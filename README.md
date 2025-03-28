@@ -19,17 +19,6 @@ The **Attendance Dashboard** is a web-based application designed to track and di
 - **JavaScript**: Handles theme switching, UI animations, and dynamic content updates.
 - **LocalStorage**: Saves theme preference for a persistent user experience.
 
-## Installation & Setup
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/your-repo/attendance-dashboard.git
-   ```
-2. Navigate to the project directory:
-   ```sh
-   cd attendance-dashboard
-   ```
-3. Open `index.html` in a web browser.
-
 ## Usage
 - Click the **theme toggle button** on the top right to switch between light and dark mode.
 - Check attendance percentage and logs for real-time updates.
@@ -51,6 +40,6 @@ The **Attendance Dashboard** is a web-based application designed to track and di
 This project is licensed under the **MIT License**.
 
 ---
-### Author: Your Name
-For any questions or contributions, feel free to contact [your-email@example.com].
+### Author: Eshab Sachan
+For any questions or contributions, feel free to contact [eshabsa@gmail.com].
 
