@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Dark Mode Colors */
+            --bg-primary: #121726;
+            --bg-secondary: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #60a5fa;
+            
+            /* Light Mode Colors */
+            --light-bg-primary: #f0f9ff;
+            --light-bg-secondary: #ffffff;
+            --light-text-primary: #1e293b;
+            --light-text-secondary: #475569;
+            --light-accent-primary: #2563eb;
+            --light-accent-secondary: #3b82f6;
+        }
+
+        /* Custom Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* Smooth Transitions */
+        * {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Dark/Light Mode Styles */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 50;
+        }
+
+        .theme-toggle:hover {
+            animation: wiggle 0.3s;
+        }
+
+        /* Enhanced Card Styles */
+        .dashboard-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+        }
+
+        /* Hover Effects */
+        .interactive-element {
+            transition: all 0.3s ease;
+        }
+
+        .interactive-element:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        /* Light Mode Specific Styles */
+        body.light-mode {
+            background-color: var(--light-bg-primary);
+            color: var(--light-text-primary);
+        }
+
+        body.light-mode .dashboard-card {
+            background: var(--light-bg-secondary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Animated Button Styles */
+        .animated-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animated-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: all 0.5s;
+        }
+
+        .animated-button:hover::after {
+            left: 100%;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i id="themeIcon" class="fas fa-moon text-2xl"></i>
+    </div>
+
+    <div id="app" class="container mx-auto px-4 py-8">
+      <!-- Navigation -->
+      <nav class="flex justify-between items-center mb-8 bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center">
+              <img src="/api/placeholder/50/50" alt="Company Logo" class="h-10 w-10 mr-3">
+              <span class="font-bold text-xl">Attendance Tracker</span>
+          </div>
+          <div class="space-x-4">
+              <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+              <button class="nav-btn" data-tab="reports">Reports</button>
+              <button class="nav-btn" data-tab="settings">Settings</button>
+              <button class="nav-btn text-red-500" data-tab="logout">Logout</button>
+          </div>
+      </nav>
+
+      <!-- Main Dashboard Grid -->
+      <div class="grid grid-cols-12 gap-6">
+          <!-- Attendance Percentage -->
+          <div class="col-span-4 bg-gray-800 rounded-lg p-6">
+              <h2 class="text-2xl font-bold mb-4">Attendance Overview</h2>
+              <div class="text-center">
+                  <div id="attendancePercentage" class="text-6xl font-bold text-green-500 mb-4">85%</div>
+                  <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
+                      <div id="attendanceBar" class="bg-green-500 h-4 rounded-full" style="width: 85%"></div>
+                  </div>
+                  <div id="attendanceMessage" class="text-yellow-500 font-semibold">
+                      <i class="fas fa-exclamation-triangle mr-2"></i>
+                      Attendance is good, keep it up!
+                  </div>
+              </div>
+          </div>
+
+          <!-- Profile Section -->
+          <div class="col-span-4 bg-gray-800 rounded-lg p-6 flex flex-col items-center">
+              <div class="relative mb-4">
+                  <img id="profileImage" src="/api/placeholder/150/150" alt="Profile" class="rounded-full w-36 h-36 object-cover border-4 border-blue-500">
+                  <input type="file" id="profileUpload" class="hidden" accept="image/*">
+                  <button id="editProfileBtn" class="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full">
+                      <i class="fas fa-edit"></i>
+                  </button>
+              </div>
+              <h3 id="userName" class="text-2xl font-bold">Lodathon</h3>
+              <p id="userRole" class="text-gray-400">Software Engineer</p>
+              <div class="mt-4 space-x-2">
+                  <button class="bg-blue-500 px-4 py-2 rounded">Edit Profile</button>
+                  <button class="bg-gray-700 px-4 py-2 rounded">Settings</button>
+              </div>
+          </div>
+
+          <!-- Company Details -->
+          <div class="col-span-4 bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center">
+              <img src="/api/placeholder/150/150" alt="Company Logo" class="mb-4">
+              <h2 class="text-2xl font-bold mb-2">Ghar Ghar SEX Corporation</h2>
+              <p class="text-gray-400 text-center mb-4">
+                  Aapka ghar,<br>
+                  Kanpur, Ayindia 80085
+              </p>
+              <div class="flex space-x-4">
+                  <a href="tel:+1234567890" class="text-blue-400">
+                      <i class="fas fa-phone mr-2"></i>123-456-7890
+                  </a>
+                  <a href="mailto:contact@xyzcorp.com" class="text-blue-400">
+                      <i class="fas fa-envelope mr-2"></i>contact@sexcorp.com
+                  </a>
+              </div>
+          </div>
+
+          <!-- Attendance Log -->
+          <div class="col-span-8 bg-gray-800 rounded-lg p-6">
+              <div class="flex justify-between items-center mb-4">
+                  <h2 class="text-2xl font-bold">Attendance Log</h2>
+                  <div class="space-x-2">
+                      <input type="date" id="logDateFilter" class="bg-gray-700 p-2 rounded">
+                      <button id="filterLogsBtn" class="bg-blue-500 px-4 py-2 rounded">
+                          <i class="fas fa-filter mr-2"></i>Filter
+                      </button>
+                      <button id="downloadLogsBtn" class="bg-green-500 px-4 py-2 rounded">
+                          <i class="fas fa-download mr-2"></i>Download
+                      </button>
+                  </div>
+              </div>
+              <div class="overflow-y-auto max-h-80 custom-scrollbar">
+                  <table class="w-full" id="attendanceLogTable">
+                      <thead class="bg-gray-700 sticky top-0">
+                          <tr>
+                              <th class="p-3 text-left">Date</th>
+                              <th class="p-3 text-left">Check-in</th>
+                              <th class="p-3 text-left">Check-out</th>
+                              <th class="p-3 text-left">Status</th>
+                          </tr>
+                      </thead>
+                      <tbody id="attendanceLogBody">
+                          <!-- Log entries will be dynamically inserted here -->
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <!-- User Details -->
+          <div class="col-span-4 bg-gray-800 rounded-lg p-6">
+              <h2 class="text-2xl font-bold mb-4">User Details</h2>
+              <div class="space-y-3">
+                  <div><strong>Full Name:</strong> <span id="fullName">Lodathon Kumar</span></div>
+                  <div><strong>Employee ID:</strong> <span id="employeeId">EMP-12345</span></div>
+                  <div><strong>Department:</strong> <span id="department">Software Engineering</span></div>
+                  <div><strong>Position:</strong> <span id="position">Senior Software Engineer</span></div>
+                  <div class="bg-gray-700 p-3 rounded">
+                      <h3 class="font-bold mb-2">Attendance Statistics</h3>
+                      <div class="grid grid-cols-3 gap-2 text-center">
+                          <div>
+                              <div id="presentDays" class="text-green-500 text-2xl">25</div>
+                              <div class="text-sm">Present</div>
+                          </div>
+                          <div>
+                              <div id="absentDays" class="text-red-500 text-2xl">2</div>
+                              <div class="text-sm">Absent</div>
+                          </div>
+                          <div>
+                              <div id="lateDays" class="text-yellow-500 text-2xl">3</div>
+                              <div class="text-sm">Late</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        function addCardAnimations() {
+            const cards = document.querySelectorAll('.dashboard-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.2}s`;
+                
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'scale(1)';
+                });
+            });
+        }
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            body.classList.toggle('light-mode');
+
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            } else {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+            const currentMode = body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', currentMode);
+        });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.remove('dark-mode');
+            body.classList.add('light-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+        function addButtonAnimations() {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.classList.add('animated-button');
+                
+                button.addEventListener('mouseenter', () => {
+                    button.style.transform = 'scale(1.05)';
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    button.style.transform = 'scale(1)';
+                });
+            });
+        }
+
+        function addChartHoverEffect() {
+            const attendanceBar = document.getElementById('attendanceBar');
+            attendanceBar.addEventListener('mouseenter', () => {
+                attendanceBar.style.transform = 'scaleX(1.1)';
+            });
+            attendanceBar.addEventListener('mouseleave', () => {
+                attendanceBar.style.transform = 'scaleX(1)';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addCardAnimations();
+            addButtonAnimations();
+            addChartHoverEffect();
+        });
+
+        document.querySelectorAll('.col-span-4, .col-span-8').forEach(el => {
+            el.classList.add('dashboard-card', 'interactive-element');
+        });
+
+        document.getElementById('filterLogsBtn').addEventListener('click', function () {
+        let selectedDate = document.getElementById('logDateFilter').value;
+        let tableRows = document.querySelectorAll('#attendanceLogBody tr');
+
+        tableRows.forEach(row => {
+            let dateCell = row.querySelector('td:first-child').textContent.trim();
+            if (selectedDate === "" || dateCell === selectedDate) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+          // Attendance Log Data
+          const attendanceData = [
+            { date: '2025-03-25', checkIn: '09:00 AM', checkOut: '05:30 PM', status: 'Present' },
+            { date: '2025-03-24', checkIn: '09:15 AM', checkOut: '05:45 PM', status: 'Late' },
+            { date: '2025-03-23', checkIn: '09:00 AM', checkOut: '05:30 PM', status: 'Present' },
+            { date: '2025-03-22', checkIn: '09:05 AM', checkOut: '05:35 PM', status: 'Late' },
+            { date: '2025-03-21', checkIn: '08:55 AM', checkOut: '05:25 PM', status: 'Present' }
+        ];
+
+        // DOM Elements
+        const attendanceLogBody = document.getElementById('attendanceLogBody');
+        const logDateFilter = document.getElementById('logDateFilter');
+        const filterLogsBtn = document.getElementById('filterLogsBtn');
+        const downloadLogsBtn = document.getElementById('downloadLogsBtn');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const profileUpload = document.getElementById('profileUpload');
+        const profileImage = document.getElementById('profileImage');
+        const navButtons = document.querySelectorAll('.nav-btn');
+
+        // Render Attendance Log
+        function renderAttendanceLogs(logs) {
+            attendanceLogBody.innerHTML = '';
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                row.classList.add('border-b', 'border-gray-700');
+                row.innerHTML = `
+                    <td class="p-3">${log.date}</td>
+                    <td class="p-3">${log.checkIn}</td>
+                    <td class="p-3">${log.checkOut}</td>
+                    <td class="p-3">
+                        <span class="${
+                            log.status === 'Present' ? 'text-green-500' : 
+                            log.status === 'Late' ? 'text-yellow-500' : 
+                            'text-red-500'
+                        }">${log.status}</span>
+                    </td>
+                `;
+                attendanceLogBody.appendChild(row);
+            });
+        }
+
+        // Filter Logs
+        filterLogsBtn.addEventListener('click', () => {
+            const filterDate = logDateFilter.value;
+            if (filterDate) {
+                const filteredLogs = attendanceData.filter(log => log.date === filterDate);
+                renderAttendanceLogs(filteredLogs);
+            } else {
+                renderAttendanceLogs(attendanceData);
+            }
+        });
+
+        // Download Logs
+        downloadLogsBtn.addEventListener('click', () => {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + attendanceData.map(e => Object.values(e).join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "attendance_log.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Profile Image Upload
+        editProfileBtn.addEventListener('click', () => {
+            profileUpload.click();
+        });
+
+        profileUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    profileImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Navigation Handling
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // In a real app, you'd handle tab switching here
+                console.log(`Navigated to ${button.dataset.tab}`);
+            });
+        });
+
+        // Initial render
+        renderAttendanceLogs(attendanceData);
+
+        // Optional: Add current date to date filter
+        const today = new Date().toISOString().split('T')[0];
+        logDateFilter.value = today;
+        logDateFilter.max = today;
+    </script>
+</body>
+</html>
